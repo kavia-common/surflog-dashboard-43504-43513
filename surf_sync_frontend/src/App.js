@@ -221,7 +221,8 @@ function App() {
 
   // --- Main render ---
   return (
-    <div className="App" style={oceanBackground}>
+    <div className="App">
+      {/* Background moved to CSS via .App/body in App.css/surfsync.css for hot-reload & theme override consistency. */}
       <TopNav tab={tab} setTab={setTab} setShowStats={setShowStats} setShowReminderUI={setShowReminderUI} />
       <main style={{ marginTop: 56, paddingBottom: 95, minHeight: '60vh', transition: 'all .3s' }}>
         {/* Home - Session cards */}
