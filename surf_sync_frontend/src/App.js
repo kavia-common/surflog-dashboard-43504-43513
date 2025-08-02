@@ -60,9 +60,76 @@ function App() {
   // Main app state
   const [theme, setTheme] = useState('light');
   const [tab, setTab] = useState('sessions'); // sessions, stats, filter
-  const [sessions, setSessions] = useState(() =>
-    JSON.parse(localStorage.getItem("surf_sessions") || "[]")
-  );
+  // --- Sample Sessions for Demo ---
+  const sampleSessions = [
+    {
+      id: 101,
+      date: "2024-06-01",
+      spot: "Pipeline",
+      board: "Shortboard",
+      waveCount: 15,
+      mood: 5,
+      swell: "2-3m",
+      wind: "Offshore",
+      tide: "High",
+      notes: "Epic morning session, barrels and clean faces. Crowded but worth it!"
+    },
+    {
+      id: 102,
+      date: "2024-05-29",
+      spot: "Ocean Beach",
+      board: "Funboard",
+      waveCount: 8,
+      mood: 3,
+      swell: "1-2m",
+      wind: "Cross-Off",
+      tide: "Rising",
+      notes: "Fun peaks, a bit mushy, wind picked up midway. Not many out."
+    },
+    {
+      id: 103,
+      date: "2024-05-23",
+      spot: "Trestles",
+      board: "Fish",
+      waveCount: 18,
+      mood: 4,
+      swell: "1-2m",
+      wind: "None",
+      tide: "Mid",
+      notes: "All-time fish session, glassy, playful. Dolphins at the lineup!"
+    },
+    {
+      id: 104,
+      date: "2024-05-15",
+      spot: "Snapper Rocks",
+      board: "Longboard",
+      waveCount: 11,
+      mood: 2,
+      swell: "<1m",
+      wind: "Onshore",
+      tide: "Low",
+      notes: "Tough conditions and lots of chop. Got a few fun noserides though."
+    },
+    {
+      id: 105,
+      date: "2024-04-30",
+      spot: "Mavericks",
+      board: "Shortboard",
+      waveCount: 3,
+      mood: 1,
+      swell: "3m+",
+      wind: "Offshore",
+      tide: "Dropping",
+      notes: "Huge day. Only went out for a couple, came in pretty humbled."
+    }
+  ];
+
+  const [sessions, setSessions] = useState(() => {
+    // If localStorage has data, use it; otherwise use demo samples
+    const stored = localStorage.getItem("surf_sessions");
+    if (stored && stored !== "[]") return JSON.parse(stored);
+    return sampleSessions;
+  });
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [showStats, setShowStats] = useState(false);
