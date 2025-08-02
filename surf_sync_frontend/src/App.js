@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // Icons as emoji fallback, can be replaced by SVGs in /assets later
@@ -55,11 +55,17 @@ function dateToISO(date) {
 
 // --- COMPONENTS ---
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Main App for SurfSync (modern, mobile-friendly, with ocean-inspired, Material-like polish)
+ */
 function App() {
   // Main app state
   const [theme, setTheme] = useState('light');
   const [tab, setTab] = useState('sessions'); // sessions, stats, filter
+  // --- Snackbar state for animated feedback ---
+  const [snack, setSnack] = useState({ show: false, msg: "", error: false });
+  const snackTimeout = useRef(null);
   // --- Sample Sessions for Demo ---
   const sampleSessions = [
     {
@@ -130,6 +136,13 @@ function App() {
     if (stored && stored !== "[]") return JSON.parse(stored);
     return sampleSessions;
   });
+
+  // Utility for user feedback (snackbar/notification)
+  const showSnackbar = (msg, options={error:false, timeout:1800}) => {
+    setSnack({ show: true, msg, error: options.error });
+    if (snackTimeout.current) clearTimeout(snackTimeout.current);
+    snackTimeout.current = setTimeout(() => setSnack({ show: false, msg: "", error: false }), options.timeout||1800);
+  };
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [showStats, setShowStats] = useState(false);
@@ -160,23 +173,41 @@ function App() {
   const handleNewSession = () => {
     setEditingSession(null);
     setShowSessionModal(true);
+    showSnackbar("Ready to log a new session!");
   };
   const handleEditSession = (s) => {
     setEditingSession({ ...s });
     setShowSessionModal(true);
+    showSnackbar("Editing session 📝");
   };
   const handleDeleteSession = (id) => {
-    if (window.confirm("Delete this surf session?"))
+    if (window.confirm("Delete this surf session?")) {
       setSessions(sessions.filter(s => s.id !== id));
+      showSnackbar("Session deleted", { error: false });
+    }
   };
   const handleSaveSession = (data) => {
+    if (!data.spot.trim()) {
+      showSnackbar("Spot is required", { error: true, timeout: 2400 });
+      return;
+    }
+    if (!data.date) {
+      showSnackbar("Date required", { error: true, timeout: 2200 });
+      return;
+    }
+    if (!data.board) {
+      showSnackbar("Select board", { error: true, timeout: 2400 });
+      return;
+    }
     if (data.id) {
       setSessions(sessions.map(s => (s.id === data.id ? data : s)));
+      showSnackbar("Session updated!");
     } else {
       setSessions([
         ...sessions,
         { ...data, id: Date.now() }
       ]);
+      showSnackbar("Surf session logged! 🏄");
     }
     setShowSessionModal(false);
   };
@@ -192,9 +223,9 @@ function App() {
   return (
     <div className="App" style={oceanBackground}>
       <TopNav tab={tab} setTab={setTab} setShowStats={setShowStats} setShowReminderUI={setShowReminderUI} />
-      <main style={{ marginTop: 56, paddingBottom: 76 }}>
+      <main style={{ marginTop: 56, paddingBottom: 95, minHeight: '60vh', transition: 'all .3s' }}>
         {/* Home - Session cards */}
-        {tab === 'sessions' &&
+        {(tab === 'sessions' && (
           <SessionList
             sessions={filteredSessions}
             onEdit={handleEditSession}
@@ -202,8 +233,8 @@ function App() {
             boards={boards}
             moods={moodsDefault}
           />
-        }
-        {tab === 'filter' &&
+        ))}
+        {(tab === 'filter' && (
           <FilterPanel
             boards={boards}
             moods={moodsDefault}
@@ -211,26 +242,37 @@ function App() {
             onChange={handleSetFilter}
             onReset={resetFilter}
             allSpots={Array.from(new Set(sessions.map(s => s.spot).concat(spotsDefault)))}
-          />}
-        {showStats || tab === 'stats' ?
-          <StatsDashboard sessions={sessions} boards={boards} moods={moodsDefault} /> : null
-        }
+          />
+        ))}
+        {(showStats || tab === 'stats') && (
+          <StatsDashboard sessions={sessions} boards={boards} moods={moodsDefault} />
+        )}
       </main>
+      {/* Floating Action Button with Material animation */}
       <button
-        className="fab"
+        className="fab material-fab"
         title="Log new session"
         aria-label="Log new session"
         onClick={handleNewSession}
+        tabIndex={0}
+        style={{ animation: 'fabPop .37s cubic-bezier(.34,1.56,.5,1)'}}
       >
         {icons.add}
+        <span className="sr-only">Log new session</span>
       </button>
+      {/* Theme toggle with extra affordance */}
       <button
         className="theme-toggle"
-        onClick={() => setTheme(t => t === "light" ? "dark" : "light")}
+        onClick={() => {
+          setTheme(t => t === "light" ? "dark" : "light");
+          showSnackbar(`Switched to ${theme === "light" ? "dark" : "light"} mode`);
+        }}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        tabIndex={0}
       >
         {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
       </button>
+      {/* session modal */}
       {showSessionModal &&
         <Modal onClose={() => setShowSessionModal(false)}>
           <SessionForm
@@ -239,9 +281,11 @@ function App() {
             moods={moodsDefault}
             editing={editingSession}
             allSpots={Array.from(new Set(sessions.map(s => s.spot).concat(spotsDefault)))}
+            showSnackbar={showSnackbar}
           />
         </Modal>
       }
+      {/* reminder modal */}
       {showReminderUI &&
         <Modal onClose={() => setShowReminderUI(false)}>
           <ReminderUI
@@ -249,6 +293,20 @@ function App() {
             onChange={setReminder}
           />
         </Modal>
+      }
+      {/* Snackbar = animated confirmation/error feedback */}
+      <Snackbar open={snack.show} message={snack.msg} error={snack.error} />
+      {/* First-time onboarding cue */}
+      {!sessions.length &&
+        <div className="onboard-cue" style={{
+          position: 'fixed', bottom: 105, right: 24, left: 24, zIndex: 2100,
+          textAlign: 'center', pointerEvents: 'none', fontWeight: 600,
+          color: '#1978a0', fontSize: 18, background: '#fffde7bb',
+          borderRadius: 10, padding: 10, boxShadow: '0 1px 12px #2196f366',
+          animation: 'slideUp .8s cubic-bezier(.33,1,.44,1) .3s 1 forwards'
+        }}>
+          Tap the <b style={{fontSize:24}}>{icons.add}</b> button to log your first surf!
+        </div>
       }
     </div>
   );
@@ -337,8 +395,8 @@ function SessionCard({ session, onEdit, onDelete, boards, moods }) {
   );
 }
 
-// Edit/Create surf session form modal
-function SessionForm({ onSave, boards, moods, editing, allSpots }) {
+/** Surf session create/edit form, with modern validations and Material UX polish */
+function SessionForm({ onSave, boards, moods, editing, allSpots, showSnackbar }) {
   const [date, setDate] = useState(editing?.date || dateToISO(new Date()));
   const [spot, setSpot] = useState(editing?.spot || "");
   const [board, setBoard] = useState(editing?.board || boards[0].name);
@@ -349,8 +407,27 @@ function SessionForm({ onSave, boards, moods, editing, allSpots }) {
   const [tide, setTide] = useState(editing?.tide || tidesDefault[1]);
   const [notes, setNotes] = useState(editing?.notes || "");
 
+  const [errors, setErrors] = useState({});
+  const formRef = useRef();
+
+  // Graceful validation (show message, mark error/field)
+  const validate = () => {
+    let errs = {};
+    if (!spot.trim()) errs.spot = "Spot required";
+    if (!date) errs.date = "Date required";
+    if (!board) errs.board = "Choose a board";
+    if (Number(waveCount) < 0) errs.waveCount = "Can't be negative";
+    if (Number(waveCount) > 200) errs.waveCount = "Too many!";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validate()) {
+      showSnackbar && showSnackbar("Please correct errors", { error: true, timeout: 2600 });
+      return;
+    }
     onSave({
       id: editing?.id,
       date,
@@ -365,10 +442,30 @@ function SessionForm({ onSave, boards, moods, editing, allSpots }) {
     });
   };
 
+  // Focus first field when opened
+  useEffect(() => {
+    setTimeout(() => {
+      if (formRef.current) {
+        const input = formRef.current.querySelector('input, select, textarea');
+        if (input) input.focus();
+      }
+    }, 150);
+  }, []);
+
   return (
-    <form className="surf-form" onSubmit={handleSubmit} style={{ minWidth: 280 }}>
+    <form className="surf-form" onSubmit={handleSubmit} style={{ minWidth: 280 }} ref={formRef} noValidate>
       <h2>{editing ? "Edit Surf Session" : "Log New Surf Session"}</h2>
-      <label>Date:<input type="date" value={dateToISO(date)} onChange={e => setDate(e.target.value)} required /></label>
+      <label>
+        Date:
+        <input
+          type="date"
+          value={dateToISO(date)}
+          onChange={e => setDate(e.target.value)}
+          required
+          className={errors.date ? "has-error" : ""}
+        />
+        {errors.date && <span className="form-err">{errors.date}</span>}
+      </label>
       <label>
         Spot:
         <input
@@ -377,21 +474,35 @@ function SessionForm({ onSave, boards, moods, editing, allSpots }) {
           onChange={e => setSpot(e.target.value)}
           placeholder="e.g. Pipeline"
           required
+          pattern=".{2,}"
+          className={errors.spot ? "has-error" : ""}
+          inputMode="text"
         />
         <datalist id="spot-options">
           {allSpots.map(s => <option key={s} value={s} />)}
         </datalist>
+        {errors.spot && <span className="form-err">{errors.spot}</span>}
       </label>
       <label>
         Board:
-        <select value={board} onChange={e => setBoard(e.target.value)}>
+        <select value={board} onChange={e => setBoard(e.target.value)} className={errors.board ? "has-error" : ""}>
           {boards.map(b => <option key={b.name} value={b.name}>{b.icon} {b.name}</option>)}
         </select>
+        {errors.board && <span className="form-err">{errors.board}</span>}
       </label>
       <label>
         Waves:
-        <input type="number" min={0} max={200} value={waveCount}
-          onChange={e => setWaveCount(e.target.value)} required />
+        <input
+          type="number"
+          min={0}
+          max={200}
+          value={waveCount}
+          onChange={e => setWaveCount(e.target.value)}
+          required
+          className={errors.waveCount ? "has-error" : ""}
+          inputMode="numeric"
+        />
+        {errors.waveCount && <span className="form-err">{errors.waveCount}</span>}
       </label>
       <div className="section-moods">
         Mood:
@@ -409,6 +520,11 @@ function SessionForm({ onSave, boards, moods, editing, allSpots }) {
                 border: mood === m.value ? "2px solid #2196f3" : "1px solid #aaa"
               }}
               aria-label={m.label}
+              tabIndex={0}
+              autoFocus={editing && editing.mood === m.value}
+              onKeyDown={e => {
+                if (e.key === " " || e.key === "Enter") e.currentTarget.click();
+              }}
             >{m.icon}</button>
           )}
         </div>
@@ -437,6 +553,7 @@ function SessionForm({ onSave, boards, moods, editing, allSpots }) {
           placeholder="Wave faces, crowds, vibe, etc."
           value={notes}
           onChange={e => setNotes(e.target.value)}
+          inputMode="text"
         />
       </label>
       <button className="btn-primary" type="submit">{editing ? "Save" : "Log Session"}</button>
@@ -444,19 +561,49 @@ function SessionForm({ onSave, boards, moods, editing, allSpots }) {
   );
 }
 
-// Modal/dialog infrastructure
+/** Modal/dialog infrastructure, with accessibility, ARIA, Material popup animation, focus trap. */
 function Modal({ children, onClose }) {
+  // Trap keyboard focus within modal
+  const modalRef = useRef();
   useEffect(() => {
     const close = (e) => { if (e.key === "Escape") onClose(); };
+    const trapFocus = (e) => {
+      if (e.key === "Tab" && modalRef.current) {
+        const focusEls = modalRef.current.querySelectorAll('button, [tabindex="0"], input, select, textarea');
+        const first = focusEls[0], last = focusEls[focusEls.length - 1];
+        if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first.focus();
+        }
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault(); last.focus();
+        }
+      }
+    };
     window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
+    window.addEventListener("keydown", trapFocus);
+    return () => {
+      window.removeEventListener("keydown", close);
+      window.removeEventListener("keydown", trapFocus);
+    };
   }, [onClose]);
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-dialog" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="Close">&times;</button>
+    <div className="modal-overlay" onClick={onClose} aria-modal="true">
+      <div className="modal-dialog popup-animate" ref={modalRef} tabIndex={-1} onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} aria-label="Close" tabIndex={0}>&times;</button>
         {children}
       </div>
+    </div>
+  );
+}
+
+/** Snackbar (animated, Material-like pop from bottom) */
+function Snackbar({ open, message, error }) {
+  return (
+    <div className={"snackbar" + (open ? " show" : "") + (error ? " is-error" : "")}
+      role="status"
+      aria-live="polite"
+    >
+      {message}
     </div>
   );
 }

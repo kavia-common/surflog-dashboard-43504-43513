@@ -223,8 +223,29 @@ a {
   transition: border 0.14s, box-shadow 0.15s;
   box-shadow: 0 2px 7px #20bba820;
 }
-.surf-form select:focus, .surf-form input[type=date]:focus, .surf-form input[type=number]:focus,
-.surf-form input[type=time]:focus, .filter-panel select:focus {
+
+.surf-form input.has-error, .surf-form select.has-error, .surf-form textarea.has-error {
+  border-color: #e87a41 !important;
+  background: #fff3e0 !important;
+  box-shadow: 0 0 0 1.5px #e87a4199;
+  animation: errPulse .21s;
+}
+@keyframes errPulse {
+  0% { box-shadow: 0 0 0 1.5px #e87a4199,0 0 0 6px #fffbe777;}
+  100% { box-shadow: 0 0 0 1.5px #e87a4199;}
+}
+.form-err {
+  color: #e87a41;
+  font-size: .96em;
+  display: block;
+  margin-top: -7px;
+  margin-bottom: 7px;
+  transition: color .2s;
+}
+
+/* Focus highlight for accessibility/touch */
+.surf-form input:focus, .surf-form select:focus, .surf-form textarea:focus,
+.filter-panel select:focus, .filter-panel input[type=time]:focus {
   border-color: #2196f3;
   outline: none;
   background: #caebf2;
