@@ -2,12 +2,27 @@
 
 /* General layout/backgrounds */
 body, .App {
-  background: linear-gradient(135deg,#2196f3 60%,#20bba8 100%) !important;
+  /* Ocean gradient with subtle wave overlay */
+  background:
+    var(--wave-overlay) repeat-x top center,
+    linear-gradient(135deg, var(--ocean-blue) 62%, var(--ocean-accent) 100%);
   min-height: 100vh;
   font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
-  color: #183350;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  /* Add a ripple animation to convey ocean movement (optional) */
 }
+
+[data-theme="dark"] body, [data-theme="dark"] .App {
+  /* Moonlight ocean at night */
+  background:
+    var(--wave-overlay) repeat-x top center,
+    radial-gradient(circle at 70% 13%, #fffbe988 12px, transparent 32px),
+    linear-gradient(120deg, #192750 70%, #28395b 100%);
+  color: var(--text-primary);
+}
+
 
 a {
   color: #2196f3;
@@ -63,6 +78,29 @@ a {
 .surf-card {
   min-width: 0;
   word-break: break-word;
+  background: linear-gradient(110deg, #20bba8dd 60%, #62cffecc 100%),
+    var(--wave-overlay) repeat-x bottom center;
+  border-radius: 22px;
+  box-shadow: 0 2px 18px #3564852a, 0 4px 24px #2196f333;
+  margin: 13px 9px;
+  padding: 18px 16px 15px 16px;
+  position: relative;
+  border: 2.5px solid var(--sand);
+  transition: box-shadow 0.2s;
+  overflow-x: auto;
+}
+
+.surf-card:before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: -2px; right: -2px; top: -10px;
+  height: 26px;
+  background: var(--wave-overlay);
+  opacity: 0.75;
+  border-radius: 22px 22px 0 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .edit-btn, .del-btn {
@@ -77,68 +115,161 @@ a {
 /* Floating Action Button */
 .fab {
   position: fixed;
-  bottom: 22px;
+  bottom: 20px;
   right: 24px;
-  background: linear-gradient(135deg,#20bba8 80%,#2196f3 100%);
-  color: #fff;
-  font-size: 2.4rem;
-  width: 64px;
-  height: 64px;
+  background:
+    linear-gradient(130deg, #fffde7 8%, #caebf2 21%, #20bba8 96%, #2196f3 100%);
+  color: #1978a0;
+  font-size: 2.8rem;
+  width: 69px;
+  height: 69px;
   border-radius: 50%;
-  border: none;
-  box-shadow: 0 2px 28px #2196f399;
+  border: 4px solid #fce4b4cc;
+  box-shadow: var(--fab-shadow), 0 0 0 4px #fffde725;
   cursor: pointer;
-  transition: background .22s, box-shadow .28s;
+  transition: background .22s, box-shadow .28s, transform .18s;
   z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.fab:hover { background: #2196f3; box-shadow: 0 6px 32px #20bba8cc; }
+.fab:hover {
+  background: linear-gradient(135deg, #fce4b4 8%, #2196f3 98%);
+  box-shadow: 0 8px 36px #2096f375, 0 0 0 7px #20bba83b;
+  transform: translateY(-3px) scale(1.05) rotate(-8deg);
+  color: #2196f3;
+}
+[data-theme="dark"] .fab {
+  background: linear-gradient(120deg,#28395b 12%,#166577 98%);
+  color: #47f8e7;
+  border: 4px solid #376c88;
+  box-shadow: 0 2px 34px #14365a77;
+}
+[data-theme="dark"] .fab:hover {
+  background: linear-gradient(111deg,#47f8e7 8%,#192750 100%);
+  color: #10213d;
+}
 
 /* Modal UI */
 .modal-overlay {
   position: fixed; left: 0; top: 0; right: 0; bottom: 0;
-  background: rgba(23,42,58,0.44);
+  /* Beachy blur + ocean overlay */
+  background:
+    linear-gradient(115deg, #2196f3 80%, #20bba800 100%) 0 0/120% 100% no-repeat,
+    url("data:image/svg+xml,%3Csvg width='800' height='100' viewBox='0 0 800 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 60C104 67 160 20 282 30C404 40 416 106 610 94C700 88 763 40 800 60V100H0V60Z' fill='%2320bba8aa'/%3E%3C/svg%3E") repeat-x bottom;
+  backdrop-filter: blur(3.2px) saturate(1.15);
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: popupFadeIn 0.25s;
+  animation: popupFadeIn 0.22s;
 }
 @keyframes popupFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .modal-dialog {
-  background: #fff;
-  border-radius: 12px;
+  background:
+    linear-gradient(98deg, #fce4b4 58%,#fff 100%);
+  border-radius: 18px 18px 26px 26px;
   max-width: 97vw;
-  box-shadow: 0 1px 20px #2196f377;
+  box-shadow: 0 4px 32px #2196f355, 0 1px 18px #376c8822;
   min-width: 280px;
-  padding: 25px 18px 18px 18px;
+  padding: 27px 20px 18px 18px;
+  border-bottom: 8px solid #20bba8;
+  border-top: 3px solid #fffde7;
+  border-left: 1.6px solid #fce4b4;
+  border-right: 1.4px solid #fce4b4;
   position: relative;
 }
+
+.modal-dialog::after {
+  /* Subtle wave border at bottom of modal */
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0; right: 0; bottom: -9px; height: 22px;
+  background: url("data:image/svg+xml,%3Csvg width='320' height='22' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 13C31 28.5 57.5-8 162 11C266.5 30 288 8.5 319 16V21.5H1V13Z' fill='%2320bba8cc'/%3E%3C/svg%3E") repeat-x bottom;
+  z-index: 11;
+  pointer-events: none;
+}
+
 .modal-close {
   position: absolute; right: 12px; top: 12px;
   border: none; background: transparent;
   font-size: 1.65rem; color: #2196f3;
   cursor: pointer;
+  z-index: 9;
 }
 
 /* Form Styles */
 .surf-form label, .filter-panel label {
   display: block;
   margin-bottom: 7px;
-  color: #2196f3;
+  color: var(--ocean-blue);
   font-weight: 500;
+  text-shadow: 0 1px 10px #fffde799;
 }
 .surf-form input[type=date], .surf-form input[type=number],
 .surf-form select, .surf-form textarea, .surf-form input[type=time],
 .filter-panel select, .filter-panel input[type=time] {
   width: 100%;
   padding: 7px;
-  border-radius: 6px;
-  border: 1px solid #20bba8;
+  border-radius: 9px;
+  border: 2px solid #20bba8bb;
   margin-top: 2px;
-  margin-bottom: 12px;
-  font-size: 1rem;
-  background: #fce4b4;
+  margin-bottom: 13px;
+  font-size: 1.07rem;
+  background:
+    linear-gradient(98deg,#fce4b4 65%,#caebf2 100%);
+  transition: border 0.14s, box-shadow 0.15s;
+  box-shadow: 0 2px 7px #20bba820;
+}
+.surf-form select:focus, .surf-form input[type=date]:focus, .surf-form input[type=number]:focus,
+.surf-form input[type=time]:focus, .filter-panel select:focus {
+  border-color: #2196f3;
+  outline: none;
+  background: #caebf2;
+  box-shadow: 0 2px 10px #2196f355;
+}
+
+.section-moods {
+  margin-bottom: 13px;
+}
+.mood-picker {
+  display: flex; flex-direction: row;
+  gap: 4px;
+}
+.mood-btn {
+  cursor: pointer;
+  border: 2px solid #b3e5fc;
+  margin-right: 8px;
+  font-size: 1.65rem;
+  padding: 3px 7px;
+  border-radius: 10px;
+  /* ocean ripple hover */
+  background: linear-gradient(120deg,#fce4b4 80%,#20bba8 100%);
+  box-shadow: 0 1px 8px #20bba855;
+  transition: border 0.14s, box-shadow 0.22s, background 0.15s, transform 0.13s;
+}
+.mood-btn.selected {
+  border: 3.5px solid #2196f3;
+  box-shadow: 0 2px 14px #2196f388, 0 0 6px #20bba822;
+  background: linear-gradient(110deg,#20bba888 50%,#fffde7 100%);
+  transform: scale(1.09) rotate(-2deg);
+  color: #09567c;
+}
+.mood-btn:hover {
+  background: #caebf2bb;
+  transform: scale(1.06);
+}
+
+.surf-form h2, .filter-panel h2, .stats-panel h2, .reminder-panel h2 {
+  color: var(--ocean-blue);
+  margin-bottom: 18px;
+  letter-spacing: 1.2px;
+  text-shadow: 0 1px 8px #20bba822;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .surf-form textarea {
@@ -183,25 +314,64 @@ a {
   box-shadow: 0 1px 10px #20bba866;
 }
 
+/* Specialized selectors for surf boards, weather, tide */
+.surf-form select, .filter-panel select {
+  background-image: url("data:image/svg+xml,%3Csvg width='28' height='15' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='20' cy='7' rx='10' ry='5.2' fill='%23219af3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 33px;
+}
+.surf-form select:focus, .filter-panel select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg width='29' height='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='16' cy='8' rx='12' ry='6' fill='%2320bba8'/%3E%3C/svg%3E");
+}
+
+.surf-form option, .filter-panel option {
+  padding-left: 5px;
+}
+
+/* Board emoji in select - large */
+.surf-form select option, .filter-panel select option {
+  font-size: 1.1rem;
+}
+
+/* Responsive surf/ocean mobile tweaks */
 @media (max-width: 600px) {
   .modal-dialog { min-width: 95vw; }
   .topnav { font-size: 0.96rem; }
   .fab { width: 52px; height: 52px; font-size: 2rem; bottom: 13px; right: 12px; }
-  .surf-card { font-size: 98%; padding: 9px; }
+  .surf-card { font-size: 96.5%; padding: 8px; }
 }
 
-.stats-panel, .reminder-panel, .stats-empty {
-  background: #fff;
-  color: #183350;
-  border-radius: 16px;
+.stats-panel, .reminder-panel, .stats-empty, .filter-panel {
+  background:
+    linear-gradient(98deg,#fce4b4 68%,#caebf2 100%);
+  color: #174379;
+  border-radius: 19px;
   margin: 20px auto 0 auto;
-  max-width: 420px;
+  max-width: 430px;
   min-width: 200px;
-  padding: 16px 10px 13px 15px;
-  box-shadow: 0 2px 36px #2196f399;
+  padding: 20px 12px 13px 19px;
+  box-shadow: 0 2px 36px #2196f355, 0 1px 12px #caebf255;
+  border: 2px solid #20bba824;
+  position: relative;
+}
+
+.stats-panel h2:before {
+  content: "🌊";
+  margin-right: 6px;
+}
+.stats-empty {
+  text-align: center;
 }
 
 .stat-block { margin-bottom: 13px; }
+
+.filter-panel {
+  border: 2px solid #caebf2;
+  box-shadow: 0px 3px 9px #20bba822;
+  background: linear-gradient(101deg, #fce4b4 75%, #caebf2 100%);
+  margin-top: 22px !important;
+}
 .mood-trend { margin-top: 8px; }
 
 @media (max-width: 400px) {

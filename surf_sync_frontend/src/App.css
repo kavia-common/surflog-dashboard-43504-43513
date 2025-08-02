@@ -1,13 +1,34 @@
 /* CSS Variables for Theme Management */
 :root {
-  /* Light theme colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --text-primary: #282c34;
-  --text-secondary: #61dafb;
-  --border-color: #e9ecef;
-  --button-bg: #007bff;
+  /* SurfSync Ocean Theme Colors */
+  --bg-primary: #caebf2;
+  --bg-secondary: #fce4b4;
+  --text-primary: #174379;
+  --text-secondary: #20bba8;
+  --border-color: #20bba8cc;
+  --button-bg: #2196f3;
   --button-text: #ffffff;
+  --ocean-blue: #2196f3;
+  --ocean-accent: #20bba8;
+  --sand: #fce4b4;
+  --fab-shadow: 0 4px 24px #20bba855;
+  --wave-overlay: url("data:image/svg+xml,%3Csvg width='980' height='120' viewBox='0 0 980 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 77C161.5 81.8333 163.632 23.8538 326.898 26.2598C490.165 28.6657 489.257 106.774 653.898 106.578C818.539 106.381 857.071 57.9639 980 77V120H0V77Z' fill='%2320bba888'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] {
+  /* Night Surf Mode */
+  --bg-primary: #1e2a47;
+  --bg-secondary: #10213d;
+  --text-primary: #c3dfeb;
+  --text-secondary: #47f8e7;
+  --border-color: #316e84cc;
+  --button-bg: #10213d;
+  --button-text: #ffffff;
+  --ocean-blue: #1c5b7a;
+  --ocean-accent: #166577;
+  --sand: #3a2c24;
+  --fab-shadow: 0 4px 24px #10213d77;
+  --wave-overlay: url("data:image/svg+xml,%3Csvg width='980' height='120' viewBox='0 0 980 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 77C161.5 81.8333 163.632 23.8538 326.898 26.2598C490.165 28.6657 489.257 106.774 653.898 106.578C818.539 106.381 857.071 57.9639 980 77V120H0V77Z' fill='%23377678cc'/%3E%3C/svg%3E");
 }
 
 [data-theme="dark"] {
